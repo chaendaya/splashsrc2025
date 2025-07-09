@@ -216,12 +216,10 @@ apply_cont' (Ready_Cont saved_cont) val store actors = do
   current <- getSelfPid
   receiveWait
     [ match $ \(msg :: RemoteMessage) -> do
-        liftIO $ putStrLn $ "[" ++ show current ++ "] " ++ show msg
         case msg of
           -- 변수 read 요청 처리
           RemoteVar varLoc requester -> do
             let returnVal = deref store varLoc
-            liftIO $ putStrLn $ "[" ++ show current ++ "] " ++ show returnVal
             case returnVal of
               Proc_Val _ -> do
                 let returnVal' = Loc_Val (remoteLocation varLoc current)
@@ -455,7 +453,6 @@ value_of_k' (Var_Exp var) env cont store actors = do
     let val = deref store' loc
     apply_cont cont val store' actors
   else do
-    liftIO $ putStrLn $ "[" ++ show current ++ "] Var_Exp " ++ show var
     send saved_actor (RemoteVar loc current)
     apply_cont (RemoteReady_Cont cont) Unit_Val store' actors
 

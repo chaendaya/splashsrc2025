@@ -241,14 +241,14 @@ data RemoteMessage =
     RemoteVar Location ActorId              -- 원격 store 주소
   | RemoteSet (Location, ExpVal) ActorId    -- (원격 store 주소, 할당할 값)
   | RemoteProc Exp Env ActorId              -- 생성할 Proc_Exp, Env
-  | RemoteCall (Location, ExpVal) ActorId   -- (원격 store 주소, 인자 값)
+  | RemoteCall (Location, ExpVal) ActorId     -- (rator, rand)
   deriving (Generic, Binary, Typeable)
 
 instance Show RemoteMessage where
   show (RemoteVar loc aid) = "RemoteVar loc: " ++ show loc ++ " from: " ++ show aid
   show (RemoteSet (loc, val) aid) = "RemoteSet loc: " ++ show loc ++ " value: " ++ show val ++ " to: " ++ show aid
   show (RemoteProc exp env aid) = "RemoteProc exp: " ++ show exp ++ " to: " ++ show aid
-  show (RemoteCall (loc, val) aid) = "RemoteCall loc: " ++ show loc ++ " value: " ++ show val ++ " to: " ++ show aid  
+  show (RemoteCall (val1, val2) aid) = "RemoteCall loc: " ++ show val1 ++ " value: " ++ show val2 ++ " to: " ++ show aid  
 
 data ReturnMessage = ReturnMessage ExpVal
   deriving (Generic, Binary, Typeable)

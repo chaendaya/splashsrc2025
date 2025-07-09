@@ -1,3 +1,4 @@
+proc(main)
 let JOIN = 1 in
 let SEND = 2 in
 let INPUT = 3 in

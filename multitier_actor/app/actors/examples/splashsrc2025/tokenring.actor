@@ -9,27 +9,35 @@ let beh = proc(name)
                         let (cmd, payload) = msg in 
                             if (cmd == START) then 
                                 begin 
-                                    print("[START]" ++ name);
-                                    let next = payload in 
-
+                                    print("[START]" ++ name ++ "\n");
+                                    let next = payload in
+                                    let count = 0 in 
                                         begin 
                                             if (name == token) then
-                                                print("\n" ++ name ++ "\n")
+                                                print("\ncount : " ++ count ++ "receive : " ++ name ++ "\n")
                                             else 
-                                                send (next, (TOKEN, token)); 
+                                                begin 
+                                                    set count = -(count, -(0,1));
+                                                    send (next, (TOKEN, token));
+                                                    print("\ncount : " ++ count ++ "\nsend to " ++ next ++ " token "++ token ++ "\n")
+                                                end; 
 
                                             letrec h1(msg) = 
                                                 let (cmd, payload) = msg in 
                                                     if (cmd == TOKEN) then 
-                                                        begin 
+                                                        begin
+                                                            set count = -(count, -(0,1));
                                                             let senttoken = payload in 
                                                                 if (name == senttoken) then
                                                                     begin 
                                                                         set token = senttoken ;
-                                                                        print("\n" ++ token ++ "\n")
+                                                                        print("\ncount : " ++ count ++ "\nreceive : " ++ senttoken ++ "\n")
                                                                     end
                                                                 else 
-                                                                    send (next, (TOKEN, senttoken));
+                                                                    begin
+                                                                        send (next, (TOKEN, senttoken));
+                                                                        print("\ncount : " ++ count ++ "\nsend to " ++ next ++ " token "++ senttoken ++ "\n")
+                                                                    end;
                                                             ready(h1)
                                                         end
                                                     else 
@@ -51,11 +59,18 @@ in
 let node3 = 
     new ( ((beh "park") "lee") )
 in
+let node4 = 
+    new ( ((beh "lee") "choi") )
+in
+let node5 = 
+    new ( ((beh  "jo") "kim") )
+in
     begin 
-        print("main begin");
         send (node1, (START, node2));
         send (node2, (START, node3));
-        send (node3, (START, node1));
+        send (node3, (START, node4));
+        send (node4, (START, node5));
+        send (node5, (START, node1));
 
         ready(proc(d) d)
     end
