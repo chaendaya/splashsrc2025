@@ -39,8 +39,23 @@ parserSpec = ParserSpec
                  in return $ PETExp (Str_Exp decoded)),
 
       rule "Expression -> - ( Expression , Expression )"
-        (\rhs -> return $ PETExp (Diff_Exp (expFrom (get rhs 3)) (expFrom (get rhs 5)))),
+        (\rhs -> return $ PETExp (Binary_Exp Diff (expFrom (get rhs 3)) (expFrom (get rhs 5)))),
 
+      rule "Expression -> ( Expression - Expression )"
+        (\rhs -> return $ PETExp (Binary_Exp Diff (expFrom (get rhs 2)) (expFrom (get rhs 4)))),
+
+      rule "Expression -> ( Expression + Expression )"
+        (\rhs -> return $ PETExp (Binary_Exp Add (expFrom (get rhs 2)) (expFrom (get rhs 4)))),
+
+      rule "Expression -> ( Expression * Expression )"
+        (\rhs -> return $ PETExp (Binary_Exp Mul (expFrom (get rhs 2)) (expFrom (get rhs 4)))),
+      
+      rule "Expression -> random Expression Expression"
+        (\rhs -> return $ PETExp (Binary_Exp Random (expFrom (get rhs 2)) (expFrom (get rhs 3)))),
+
+      rule "Expression -> ( Expression mod Expression )"
+        (\rhs -> return $ PETExp (Binary_Exp Mod (expFrom (get rhs 2)) (expFrom (get rhs 4)))),
+      
       rule "Expression -> if Expression then Expression else Expression"
         (\rhs -> return $ PETExp (If_Exp (expFrom (get rhs 2)) (expFrom (get rhs 4)) (expFrom (get rhs 6)))),
 
@@ -67,10 +82,7 @@ parserSpec = ParserSpec
               Nothing -> 
                 PETExp (Proc_Exp Nothing (getText rhs 4) (expFrom (get rhs 6)))
               Just ('@':roleVar) ->
-                let param   = getText rhs 4 in
-                if param == "self"
-                then PETExp (BehavAt_Exp roleVar (Proc_Exp (Just roleVar) (getText rhs 4) (expFrom (get rhs 6))))
-                else PETExp (ProcAt_Exp roleVar (Proc_Exp (Just roleVar) (getText rhs 4) (expFrom (get rhs 6))))
+                PETExp (Proc_Exp Nothing roleVar (Proc_Exp (Just roleVar) (getText rhs 4) (expFrom (get rhs 6))))
               Just actorName ->
                 PETExp (Proc_Exp (Just actorName) (getText rhs 4) (expFrom (get rhs 6)))),
 
@@ -157,8 +169,8 @@ parserSpec = ParserSpec
       rule "Expression -> new ( Expression )"
         (\rhs -> return $ PETExp (New_Exp (expFrom (get rhs 3)))),
 
-      rule "Expression -> spawn ( Expression )"
-        (\rhs -> return $ PETExp (Spawn_Exp (expFrom (get rhs 3)))),
+      -- rule "Expression -> spawn ( Expression )"
+      --   (\rhs -> return $ PETExp (Spawn_Exp (expFrom (get rhs 3)))),
 
       -- Tuples
       rule "Expression -> ( TupleExpressionList )"
@@ -197,7 +209,11 @@ parserSpec = ParserSpec
         (\_ -> return $ PETOptIdentifier Nothing),
 
       rule "OptIdentifier -> identifier"
-        (\rhs -> return $ PETOptIdentifier (Just (getText rhs 1)))
+        (\rhs -> return $ PETOptIdentifier (Just (getText rhs 1))),
+
+      -- zkp
+      rule "Expression -> powMod Expression Expression Expression"
+        (\rhs -> return $ PETExp (PowMod_Exp (expFrom (get rhs 2)) (expFrom (get rhs 3)) (expFrom (get rhs 4))))
     ],
     
     baseDir        = "./",

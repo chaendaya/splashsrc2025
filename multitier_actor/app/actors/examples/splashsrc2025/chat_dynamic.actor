@@ -3,6 +3,9 @@ let JOIN = 1 in
 let SEND = 2 in
 let INPUT = 3 in
 let RECV = 4 in
+let chatLog = () in
+let saveChat = proc (msg) append(chatLog, msg) in
+
 let server = new ( proc (self)
                         let registry = () in
                         letrec listen (msg) =
@@ -16,19 +19,21 @@ let server = new ( proc (self)
                                 end
                             else if (tag == SEND)
                                 then begin
+                                        (saveChat from);
                                         send(registry, (RECV,from));
                                         ready(listen)
                                     end
                                 else
-                                    begin
-                                        print(500);
-                                        ready(listen)
-                                    end
+                                    ready(listen)
                         in ready(listen) )
-
+in
+let getChat = proc server (msg) 
+                        if (msg == JOIN)
+                        then chatLog
+                        else print("not new client")
 in
 let clientBehavior = proc @client (self)
-                        let clientInput = spawn( proc(d)
+                        let clientInput = new ( proc(d)
                                             letrec input (d) = 
                                                 let msg = read() in
                                                 begin
@@ -59,12 +64,26 @@ let clientBehavior = proc @client (self)
                                             ready(listen)
                                         end
                                     else
-                                        begin
-                                            print(500);
-                                            ready(listen)
-                                        end
+                                        ready(listen)
                         in begin
                                 send(server, (JOIN, self));
+                                let history = (getChat JOIN) in
+                                    print(history ++ "\n");
                                 ready(listen)
                            end
-in ready(proc(d)d)
+in 
+letrec mainBehavior (msg) = 
+            let (tag, payload) = msg in
+            if (tag == "CONNECT")
+            then 
+                let (role, pid) = payload in
+                if (role == "client")
+                then
+                    begin
+                        print("[SYSTEM] CONNECT received\n");
+                        new ((clientBehavior pid));
+                        ready(mainBehavior)
+                    end
+                else ready(mainBehavior)
+            else ready(mainBehavior)
+in ready(mainBehavior)
