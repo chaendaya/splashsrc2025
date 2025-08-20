@@ -5,28 +5,32 @@ proc(main)
     let commit = 0 in
 
     let prover = new ( proc(self)
-                        letrec loop (d) = ready(loop) in ready(loop) ) in
+                            letrec loop (d) = ready(loop) in ready(loop) ) in
     let verifier = new ( proc(self)
                             letrec loop (d) = ready(loop) in ready(loop) ) in
 
-    let setCommit = proc prover (d)
-                        let secret = 6 in
-                        begin
-                            set commit = powMod g secret p;
-                            let r = random 1 (p-2) in
-                            let t = powMod g r p in
-                                (r,t)
-                        end
+    let publishCommit = proc prover (d)
+                    let secret = 6 in
+                    begin
+                        set commit = powMod g secret p;
+
+                        proc prover (d)
+                          let r = random 1 (p-2) in
+                          let t = powMod g r p in
+                            (
+                             proc prover (c)
+                               let s = (((c * secret) + r) mod (p-1)) in
+                                  s
+
+                             ,t)
+                    end
     in
+
+    let init = (publishCommit 100) in 
+
     let challenge = proc verifier (d)
                            let c = random 0 1 in
                                c
-    in
-    let response = proc prover (args)
-                          let (c,r) = args in
-                          let secret = 6 in
-                          let s = (((c * secret) + r) mod (p-1)) in
-                              s
     in
     let verify = proc verifier (args)
                      let (s,t,c) = args in
@@ -37,8 +41,8 @@ proc(main)
                          else print("fail")
     in
     let login = proc verifier (d)
-                    let (r,t) = (setCommit 100)     in    
-                    let c     = (challenge 100)  in     
-                    let s     = (response (c,r)) in 
+                    let (response,t) = (init 100) in    
+                    let c     = (challenge 100) in     
+                    let s     = (response c) in 
                     (verify (s,t,c))                    
     in (login 200)
