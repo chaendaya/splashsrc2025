@@ -31,3 +31,18 @@ and supporting real distributed execution on Cloud Haskell.
 ```
 e.g. 
 `stack run actors-exe main 127.0.0.1:8080 .\app\actors\examples\splashsrc2025\bookseller1.actor`
+
+
+
+
+When you want dynamic attatchment (e.g. chat program)
+
+```
+> stack run actors-exe main <main-ip>:<main-port> .\app\actors\examples\splashsrc2025\chat_dynamic.actor
+
+> stack run actors-exe client <cli1-ip>:<cli1-port> <main-ip>:<main-port> .\app\actors\examples\splashsrc2025\chat_dynamic.actor
+
+> stack run actors-exe client <cli2-ip>:<cli2-port> <main-ip>:<main-port> .\app\actors\examples\splashsrc2025\chat_dynamic.actor
+
+...
+```
