@@ -14,7 +14,8 @@ and supporting real distributed execution on Cloud Haskell.
 <img width="782" height="292" alt="image" src="https://github.com/user-attachments/assets/94782368-bb28-435a-aee8-f4d68a25344c" />
 
 - multi-tier actor calculus (operational semantics) (2025.09 update)
-  [mapl semantics.pdf](https://github.com/user-attachments/files/22930067/mapl.semantics.pdf)
+  [mapl_semantics.pdf](https://github.com/user-attachments/files/22930462/mapl_semantics.pdf)
+
 
 
 
